@@ -7,16 +7,19 @@ import { withRouter } from 'react-router'
 const SingleCookie = props => {
   // this.props.fetchSingleCookieFromServer(this.props.match.params.id)
   // console.log('RENDERING SINGLE COOKIE')
+  // console.log('PROPS', props)
   useEffect(() => {
     props.fetchSingleCookieFromServer(props.match.params.id)
   }, [props.match.params.id])
   const { name } = props.singleCookie
+  if (props.cookies.length === 0) return 'Loading...'
   return <div>SingleCookie Component: {name}</div>
 }
 
 const mapState = store => {
   return {
     singleCookie: store.singleCookie,
+    cookies: store.cookies
   }
 }
 

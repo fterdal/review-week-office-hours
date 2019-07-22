@@ -5,6 +5,8 @@ import axios from 'axios'
 // ACTION TYPES
 const SET_COOKIES = 'SET_COOKIES'
 const ADD_COOKIE = 'ADD_COOKIE'
+const REMOVE_COOKIE = 'REMOVE_COOKIE'
+const CHANGE_COOKIE = 'CHANGE_COOKIE'
 
 // ACIION CREATORS
 export const setCookies = cookies => {
@@ -17,6 +19,19 @@ export const addCookie = cookie => {
   return {
     type: ADD_COOKIE,
     cookie,
+  }
+}
+export const removeCookie = cookieId => {
+  return {
+    type: REMOVE_COOKIE,
+    cookieId,
+  }
+}
+export const changeCookie = (cookieId, name) => {
+  return {
+    type: CHANGE_COOKIE,
+    cookieId,
+    name,
   }
 }
 
@@ -32,14 +47,31 @@ export const fetchCookies = () => async dispatch => {
 
 export const postCookie = newCookie => async dispatch => {
   try {
-    console.log('TRYING TO POST A COOKIE')
     const { data } = await axios.post('/api/cookies', newCookie)
 
-    // Efficient (Hard) Way
     dispatch(addCookie(data))
+  } catch (err) {
+    console.log(err)
+  }
+}
 
-    // Inefficient (Easy) Way
-    // dispatch(fetchCookies())
+export const deleteCookie = cookieId => async dispatch => {
+  try {
+    await axios.delete(`/api/cookies/${cookieId}`)
+
+    dispatch(removeCookie(cookieId))
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+export const editCookie = (cookieId, newName) => async dispatch => {
+  try {
+    const { data } = await axios.put(`/api/cookies/${cookieId}`, {
+      name: newName,
+    })
+
+    dispatch(changeCookie(cookieId, data.name))
   } catch (err) {
     console.log(err)
   }
@@ -54,6 +86,13 @@ export const cookiesReducer = (state = initialState, action) => {
       return action.cookies
     case ADD_COOKIE:
       return [...state, action.cookie]
+    case REMOVE_COOKIE:
+      return state.filter(cookie => cookie.id !== action.cookieId)
+    case CHANGE_COOKIE:
+      return state.map(cookie => {
+        if (cookie.id !== action.cookieId) return cookie
+        return { ...cookie, name: action.name }
+      })
     default:
       return state
   }

@@ -25,7 +25,6 @@ app.get('/api/cookies', async (req, res, next) => {
 
 app.post('/api/cookies', async (req, res, next) => {
   try {
-    console.log('req.body', req.body)
     const { name } = req.body
     const cookie = await Cookie.create({ name })
     res.json(cookie)
@@ -41,6 +40,33 @@ app.get('/api/cookies/:id', async (req, res, next) => {
       include: [{ model: Monster }],
     })
     res.json(cookie)
+  } catch (err) {
+    next(err)
+  }
+})
+
+app.delete('/api/cookies/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id)
+    await Cookie.destroy({
+      where: { id },
+    })
+    res.sendStatus(204)
+  } catch (err) {
+    next(err)
+  }
+})
+
+app.put('/api/cookies/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id)
+    const cookie = await Cookie.findByPk(id)
+    if (!cookie) {
+      return res.sendStatus(404)
+    }
+    const { name } = req.body
+    const updatedCookie = await cookie.update({ name })
+    res.json(updatedCookie)
   } catch (err) {
     next(err)
   }
